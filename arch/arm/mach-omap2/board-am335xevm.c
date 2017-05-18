@@ -691,6 +691,11 @@ static struct pinmux_config lcdc_pin_mux[] = {
 						       | AM33XX_PULL_DISA},
 	{"lcd_data15.lcd_data15",	OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT
 						       | AM33XX_PULL_DISA},
+#if 0
+	/*
+	 * disable pins below as conflicts with WL1835MOD pins and LCD
+	 * used doesn't need these pins either.
+	 */
 	{"gpmc_ad8.lcd_data16",		OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
 	{"gpmc_ad9.lcd_data17",		OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
 	{"gpmc_ad10.lcd_data18",	OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
@@ -699,6 +704,7 @@ static struct pinmux_config lcdc_pin_mux[] = {
 	{"gpmc_ad13.lcd_data21",	OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
 	{"gpmc_ad14.lcd_data22",	OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
 	{"gpmc_ad15.lcd_data23",	OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
+#endif
 	{"lcd_vsync.lcd_vsync",		OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},
 	{"lcd_hsync.lcd_hsync",		OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},
 	{"lcd_pclk.lcd_pclk",		OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},
@@ -1056,6 +1062,21 @@ static struct pinmux_config mmc1_cd_only_pin_mux[] = {
 static struct pinmux_config uart3_pin_mux[] = {
 	{"spi0_cs1.uart3_rxd", AM33XX_PIN_INPUT_PULLUP},
 	{"ecap0_in_pwm0_out.uart3_txd", AM33XX_PULL_ENBL},
+	{NULL, 0},
+};
+
+/* uart3 pin mux for wl1835mod
+ *
+ * [Out] BT_HCI_RTS  ---->    UART3_RTS
+ * [In ] BT_HCI_CTS  <----    UART3_CTS
+ * [Out] BT_HCI_TX   ---->    UART3_RX
+ * [In ] BT_HCI_RX   <----    UART3_TX
+ */
+static struct pinmux_config uart3_wl18xx_pin_mux[] = {
+	{"mii1_rxd3.uart3_rxd", OMAP_MUX_MODE1 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_rxd2.uart3_txd", OMAP_MUX_MODE1 | AM33XX_PULL_ENBL},
+	{"mdio_data.uart3_ctsn", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT},
+	{"mdio_clk.uart3_rtsn", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
 	{NULL, 0},
 };
 
@@ -1566,6 +1587,28 @@ static struct pinmux_config mmc2_wl12xx_pin_mux[] = {
 	{NULL, 0},
 };
 
+/* mmc pin mux for wl1835mod when remux with gpmc */
+static struct pinmux_config mmc2_wl18xx_gpmc_pin_mux[] = {
+	{"gpmc_ad12.mmc2_dat0", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_ad13.mmc2_dat1", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_ad14.mmc2_dat2", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_ad15.mmc2_dat3", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_csn3.mmc2_cmd", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_clk.mmc2_clk", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},
+	{NULL, 0},
+};
+
+/* mmc pin mux for wl1835mod when remux with mii1 */
+static struct pinmux_config mmc2_wl18xx_mii1_pin_mux[] = {
+	{"mii1_rxdv.mmc2_dat0", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_txd3.mmc2_dat1", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_txd2.mmc2_dat2", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_col.mmc2_dat3", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_txen.mmc2_cmd", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},
+	{"mii1_rxd1.mmc2_clk", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},
+	{NULL, 0},
+};
+
 static struct pinmux_config uart1_wl12xx_pin_mux[] = {
 	{"uart1_ctsn.uart1_ctsn", OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},
 	{"uart1_rtsn.uart1_rtsn", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT},
@@ -1585,6 +1628,24 @@ static struct pinmux_config wl12xx_pin_mux_sk[] = {
 	{"gpmc_wpn.gpio0_31", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},
 	{"gpmc_csn0.gpio1_29", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT_PULLUP},
 	{"mcasp0_ahclkx.gpio3_21", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
+	{NULL, 0},
+};
+
+/* Module pin mux for wl1835mod on bbgw */
+static struct pinmux_config wl18xx_pin_mux_profile2[] = {
+	{"gpmc_ad10.gpio0_26", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* WL_EN */
+	{"gpmc_ad11.gpio0_27", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLDOWN}, /* WL_IRQ */
+	{"gpmc_csn0.gpio1_29", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* BF_EN */
+	{"gpmc_ben1.gpio1_28", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* BT_EN */
+	{NULL, 0},
+};
+
+/* Module pin mux for wl1835mod on bbbw */
+static struct pinmux_config wl18xx_pin_mux_profile3[] = {
+	{"mii1_txclk.gpio3_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* WL_EN */
+	{"rmii1_refclk.gpio0_29", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLDOWN}, /* WL_IRQ */
+	{"mii1_rxclk.gpio3_10", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* BF_EN */
+	{"mii1_txd0.gpio0_28", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* BT_EN */
 	{NULL, 0},
 };
 
@@ -2128,6 +2189,12 @@ static void usb1_init(int evm_id, int profile)
 static void uart3_init(int evm_id, int profile)
 {
 	setup_pin_mux(uart3_pin_mux);
+	return;
+}
+
+static void uart3_wl18xx_init(int evm_id, int profile)
+{
+	setup_pin_mux(uart3_wl18xx_pin_mux);
 	return;
 }
 
@@ -2743,6 +2810,27 @@ static void mmc2_wl12xx_init(int evm_id, int profile)
 	return;
 }
 
+static void mmc2_wl18xx_init(int evm_id, int profile)
+{
+	if (profile & PROFILE_2)
+		setup_pin_mux(mmc2_wl18xx_gpmc_pin_mux);
+	else if (profile & PROFILE_3)
+		setup_pin_mux(mmc2_wl18xx_mii1_pin_mux);
+	else
+		return;
+
+	am335x_mmc[2].mmc = 3;
+	am335x_mmc[2].name = "wl18xx";
+	am335x_mmc[2].caps = MMC_CAP_4_BIT_DATA | MMC_CAP_POWER_OFF_CARD;
+	am335x_mmc[2].nonremovable = true;
+	am335x_mmc[2].gpio_cd = -EINVAL;
+	am335x_mmc[2].gpio_wp = -EINVAL;
+	am335x_mmc[2].ocr_mask = MMC_VDD_165_195; /* 1.8V */
+
+	/* mmc will be initialized when mmc0_init is called */
+	return;
+}
+
 static void uart1_wl12xx_init(int evm_id, int profile)
 {
 	setup_pin_mux(uart1_wl12xx_pin_mux);
@@ -2918,11 +3006,104 @@ static void wl12xx_init(int evm_id, int profile)
 		goto out;
 	}
 
+	pdata->slots[0].set_power = wl12xx_set_power;
+out:
+	return;
+}
+
+static void wl18xx_init(int evm_id, int profile)
+{
+	struct device *dev;
+	struct omap_mmc_platform_data *pdata;
+	int ret;
+	struct pinmux_config *wl18xx_pin_mux;
+	int bf_en, wl_irq;
+
+	if (profile & PROFILE_2) {
+		/***********************************************************************
+		 * BT_AUD_OUT from wl1835 has to be pulled low when WL_EN is activated.
+		 * in case it isn't, wilink8 ends up in one of the test modes that
+		 * intruces various issues (elp wakeup timeouts etc.)
+		 * On the BBGW this pin is routed through the level shifter (U21) that
+		 * introduces a pullup on the line and wilink8 ends up in a bad state.
+		 * use a gpio hog to force this pin low. An alternative may be adding
+		 * an external pulldown on U21 pin 4.
+		 ***********************************************************************/
+		static struct pinmux_config wl18xx_pin_mux_aud_out[] = {
+			{"mcasp0_axr0.gpio3_16", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, /* WL_EN */
+			{NULL, 0},
+		};
+		setup_pin_mux(wl18xx_pin_mux_aud_out);
+		ret = gpio_request_one(GPIO_TO_PIN(3, 16), GPIOF_OUT_INIT_LOW, "aud_out");
+		if (ret) {
+			pr_err("Error requesting aud_out gpio: %d\n", ret);
+		}
+
+		wl_irq = GPIO_TO_PIN(0, 27);
+		/* wilink setup for GreenWireless */
+		am335xevm_wlan_data.irq = OMAP_GPIO_IRQ(wl_irq);
+		am335xevm_wlan_data.wlan_enable_gpio = GPIO_TO_PIN(0, 26);
+		am335xevm_wlan_data.bt_enable_gpio = GPIO_TO_PIN(1, 28);
+		am335xevm_wlan_data.platform_quirks = WL12XX_PLATFORM_QUIRK_EDGE_IRQ;
+		/* note: board_ref_clock and board_tcxo_clock is useless */
+
+		wl18xx_pin_mux = wl18xx_pin_mux_profile2;
+		bf_en = GPIO_TO_PIN(1, 29);
+	} else if (profile & PROFILE_3) {
+		wl_irq = GPIO_TO_PIN(0, 29);
+		/* wilink setup for BlackWireless */
+		am335xevm_wlan_data.irq = OMAP_GPIO_IRQ(wl_irq);
+		am335xevm_wlan_data.wlan_enable_gpio = GPIO_TO_PIN(3, 9);
+		am335xevm_wlan_data.bt_enable_gpio = GPIO_TO_PIN(0, 28);
+		am335xevm_wlan_data.platform_quirks = WL12XX_PLATFORM_QUIRK_EDGE_IRQ;
+		/* note: board_ref_clock and board_tcxo_clock is useless */
+
+		wl18xx_pin_mux = wl18xx_pin_mux_profile3;
+		bf_en = GPIO_TO_PIN(3, 10);
+	} else
+		return;
+
+	/* wl18xx pinmux setup */
+	setup_pin_mux(wl18xx_pin_mux);
+
+	wilink_pdata.nshutdown_gpio = am335xevm_wlan_data.bt_enable_gpio;
+	strlcpy(wilink_pdata.dev_name, "/dev/ttyO3", sizeof(wilink_pdata.dev_name));
+
+	wl12xx_bluetooth_enable();
+
+	if (wl12xx_set_platform_data(&am335xevm_wlan_data))
+		pr_err("error setting wl12xx data\n");
+
+	dev = am335x_mmc[2].dev;
+	if (!dev) {
+		pr_err("wl12xx mmc device initialization failed\n");
+		goto out;
+	}
+
+	pdata = dev->platform_data;
+	if (!pdata) {
+		pr_err("Platfrom data of wl12xx device not set\n");
+		goto out;
+	}
+
+	ret = gpio_request_one(bf_en, GPIOF_OUT_INIT_HIGH, "bf_en");
+	if (ret) {
+		pr_err("Error requesting buffer enable gpio: %d\n", ret);
+		goto out;
+	}
+
+	ret = gpio_request_one(am335xevm_wlan_data.wlan_enable_gpio,
+		GPIOF_OUT_INIT_LOW, "wlan_en");
+	if (ret) {
+		pr_err("Error requesting wlan enable gpio: %d\n", ret);
+		goto out;
+	}
 
 	pdata->slots[0].set_power = wl12xx_set_power;
 out:
 	return;
 }
+
 
 static void d_can_init(int evm_id, int profile)
 {
@@ -3145,7 +3326,6 @@ static void spi1_init(int evm_id, int profile)
 	return;
 }
 
-
 static int beaglebone_phy_fixup(struct phy_device *phydev)
 {
 	phydev->supported &= ~(SUPPORTED_100baseT_Half |
@@ -3336,18 +3516,22 @@ static struct evm_dev_cfg beaglebone_dev_cfg[] = {
 
 /* Beaglebone Black */
 static struct evm_dev_cfg beaglebone_black_dev_cfg[] = {
-	{am335x_rtc_init, DEV_ON_BASEBOARD, PROFILE_NONE},
-	{tps65217_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{mii1_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{usb0_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{usb1_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{mmc1_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{mmc0_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{i2c2_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{mcasp0_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
-	{sgx_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
+	{am335x_rtc_init, DEV_ON_BASEBOARD, PROFILE_ALL},
+	{tps65217_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{mii1_init,	DEV_ON_BASEBOARD, PROFILE_1},
+	{usb0_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{usb1_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{mmc1_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{mmc2_wl18xx_init, DEV_ON_BASEBOARD, PROFILE_2 | PROFILE_3},
+	{mmc0_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{uart3_wl18xx_init, DEV_ON_BASEBOARD, PROFILE_2 | PROFILE_3},
+	{wl18xx_init, DEV_ON_BASEBOARD, PROFILE_2 | PROFILE_3},
+	{i2c2_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{mcasp0_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+	{sgx_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
 	{NULL, 0, 0},
 };
+
 /* EVM - Starter Kit */
 static struct evm_dev_cfg evm_sk_dev_cfg[] = {
 	{am335x_rtc_init, DEV_ON_BASEBOARD, PROFILE_ALL},
@@ -3564,12 +3748,40 @@ static void setup_beaglebone_black(void)
 	/* Beagle Bone has Micro-SD slot which doesn't have Write Protect pin */
 	am335x_mmc[0].gpio_wp = -EINVAL;
 
-	_configure_device(BEAGLE_BONE_BLACK, beaglebone_black_dev_cfg, PROFILE_NONE);
+	_configure_device(BEAGLE_BONE_BLACK, beaglebone_black_dev_cfg, PROFILE_1);
 
 	/* TPS65217 regulator has full constraints */
 	regulator_has_full_constraints();
 
 	am33xx_cpsw_init(AM33XX_CPSW_MODE_MII, NULL, NULL);
+}
+
+/* BeagleBone Green Wireless */
+static void setup_beaglebone_green_wireless(void)
+{
+	pr_info("The board is a AM335x Beaglebone Green Wireless.\n");
+
+	/* Beagle Bone has Micro-SD slot which doesn't have Write Protect pin */
+	am335x_mmc[0].gpio_wp = -EINVAL;
+
+	_configure_device(BEAGLE_BONE_BLACK, beaglebone_black_dev_cfg, PROFILE_2);
+
+	/* TPS65217 regulator has full constraints */
+	regulator_has_full_constraints();
+}
+
+/* BeagleBone Black wireless */
+static void setup_beaglebone_black_wireless(void)
+{
+	pr_info("The board is a AM335x Beaglebone Black Wireless.\n");
+
+	/* Beagle Bone has Micro-SD slot which doesn't have Write Protect pin */
+	am335x_mmc[0].gpio_wp = -EINVAL;
+
+	_configure_device(BEAGLE_BONE_BLACK, beaglebone_black_dev_cfg, PROFILE_3);
+
+	/* TPS65217 regulator has full constraints */
+	regulator_has_full_constraints();
 }
 
 /* EVM - Starter Kit */
@@ -3793,7 +4005,12 @@ static void am335x_evm_setup(struct memory_accessor *mem_acc, void *context)
 			mpu_dev = omap_device_get_by_hwmod_name("mpu");
 			opp_enable(mpu_dev, AM33XX_ES2_0_OPPNITRO_FREQ);
 		}
-		setup_beaglebone_black();
+		if (!strncmp("GW1", config.version, 3))
+			setup_beaglebone_green_wireless();
+		else if (!strncmp("BW", config.version, 2))
+			setup_beaglebone_black_wireless();
+		else
+			setup_beaglebone_black();
 	} else if (!strncmp("A335X_SK", config.name, 8)) {
 		daughter_brd_detected = false;
 		setup_starterkit();
